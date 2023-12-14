@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Find URLs with Keyword</title>
+</head>
+<body>
+    <h1>Find URLs with Keyword</h1>
+    <form action="/extract" method="post">
+        <label for="websiteUrl">Website URL:</label>
+        <input type="search" id="websiteUrl" name="websiteUrl"><br><br>
+        <label for="keyword">Keyword:</label>
+        <input type="search" id="keyword" name="keyword"><br><br>
+        <button type="submit">Search</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const websiteUrl = document.getElementById('websiteUrl').value;
+            const keyword = document.getElementById('keyword').value;
+            
+            const response = await fetch('/extract', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `websiteUrl=${websiteUrl}&keyword=${keyword}`
+            });
+
+            const data = await response.json();
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            if (data.urls && data.urls.length > 0) {
+                const ul = document.createElement('ul');
+                data.urls.forEach(url => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.textContent = url;
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                });
+                resultDiv.appendChild(ul);
+            } else {
+                resultDiv.textContent = `No matching URLs found for "${data.keyword}".`;
+            }
+        });
+    </script>
+</body>
+</html>
